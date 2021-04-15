@@ -22,9 +22,18 @@ Pre-Requisites:
         > ci.labels.add('onefuse')
         > ci.save()
 2. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
-3. Update FILE_PATH to reflect the directory where the repo was cloned to
-4. Update GIT_AUTHOR to reflect the author information
+    > mkdir /var/opt/cloudbolt/proserv/<directory name here>
+    > cd /var/opt/cloudbolt/proserv/<directory name here>
+    > git clone https://<git username>:<git password>@github.com/<repo url>
+3. Update FILE_PATH below to reflect the directory where the repo was cloned to
+4. Update GIT_AUTHOR below to reflect the author information
 
+Use: 
+1. Copy the entire onefuse_backups directory to /var/opt/cloudbolt/proserv/xui/ on the OneFuse appliance
+2. This script can be executed by:
+    > python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_backups.py
+
+This script can also be scheduled using cron if desired to have schedule policy backups/versioning
 """
 
 
@@ -76,7 +85,7 @@ def create_json_files(response,policy_type):
                 if exc.errno != errno.EEXIST:
                     raise
         
-        f = open(f'{FILE_PATH}{policy_type}/{policy["name"]}','w+')
+        f = open(f'{FILE_PATH}{policy_type}/{policy["name"]}.json','w+')
         f.write(json.dumps(policy, indent=4))
         f.close()
     
