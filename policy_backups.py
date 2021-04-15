@@ -6,8 +6,24 @@ This script will:
 1. Connect to OneFuse via REST and store all OneFuse Policies in JSON in a local directory
 2. Use git to synch policies to a git repo
 
-
-
+Pre-Requisites: 
+1. Create a Connection Info for onefuse. This must be labelled as 'onefuse', and named 'onefuse'
+        - To do this manually from shell plus: 
+        > python /opt/cloudbolt/manage.py shell_plus
+        > ci = ConnectionInfo(
+              name='onefuse',
+              username='<username>',
+              password='<password>',
+              ip='<onefuse fqdn>',
+              port=<port>,
+              protocol='https'
+          )
+        > ci.save()
+        > ci.labels.add('onefuse')
+        > ci.save()
+2. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
+3. Update FILE_PATH to reflect the directory where the repo was cloned to
+4. Update GIT_AUTHOR to reflect the author information
 
 """
 
@@ -25,6 +41,7 @@ import json
 from api_wrapper import OneFuseConnector
 import os
 import errno
+import subprocess
 
 
 
@@ -74,7 +91,7 @@ def key_exists(dict, key):
 
 def main():
     policy_types = [
-        "moduleCredentials","endpoints","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
+        "moduleCredentials","endpoints","validators","namingSequences","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
         "scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
     ]
 
@@ -91,13 +108,22 @@ def main():
                 next_exists = create_json_files(response,policy_type)
 
                 
-    
     #Use git to synch changes to repo
-    #git pull
-    #git add *
-    #git commit -a -m "OneFuse testing" --author="OneFuse Admin <onefuse@cloudbolt.io>"
-    #git push
+    GIT_PATH = f'{FILE_PATH}.git'
+    git_args = [
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}','pull'],
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'add', '*'],
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'push']
+    ]
+    for args in git_args:
+        res = subprocess.Popen(args, stdout=subprocess.PIPE)
+        output, _error = res.communicate()
 
+        if not _error:
+            print(output)
+        else:
+            print(_error)
 
 if __name__ == "__main__":
     main()
