@@ -84,13 +84,11 @@ def create_json_files(response,policy_type):
             except OSError as exc: # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-        
         f = open(f'{FILE_PATH}{policy_type}/{policy["name"]}.json','w+')
         f.write(json.dumps(policy, indent=4))
         f.close()
     
     return key_exists(response_json["_links"], "next")
-
 
 def key_exists(dict, key):  
     if key in dict.keys():
