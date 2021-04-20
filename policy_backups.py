@@ -119,7 +119,7 @@ def main():
     GIT_PATH = f'{FILE_PATH}.git'
     git_args = [
         ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}','pull'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'add', '*'],
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'add', '.'],
         ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
         ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'push']
     ]
