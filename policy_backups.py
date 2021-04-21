@@ -93,7 +93,13 @@ def create_json_files(response,policy_type,onefuse):
             except OSError as exc: # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-        f = open(f'{FILE_PATH}{policy_type}/{policy["name"]}.json','w+')
+        if "type" in policy:
+            file_name = f'{FILE_PATH}{policy_type}/{policy["type"]}_{policy["name"]}.json'
+        elif "endpointType" in policy:
+            file_name = f'{FILE_PATH}{policy_type}/{policy["endpointType"]}_{policy["name"]}.json'
+        else: 
+            file_name = f'{FILE_PATH}{policy_type}/{policy["name"]}.json'
+        f = open(file_name,'w+')
         f.write(json.dumps(policy, indent=4))
         f.close()
     
