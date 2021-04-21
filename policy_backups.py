@@ -57,11 +57,17 @@ import subprocess
 FILE_PATH = '/var/opt/cloudbolt/proserv/onefuse_backups/se-onefuse-dev2_backups/'
 GIT_AUTHOR = 'OneFuse Admin <onefuse@cloudbolt.io>' #format: 'First Last <email@domain.com>', there must be a space between Last and <
 
-def create_json_files(response,policy_type):
+def create_json_files(response,policy_type,onefuse):
     try:
         response.raise_for_status()
     except:
-        detail = response.json()["detail"]
+        try: 
+            detail = response.json()["detail"]
+        except: 
+            error_string = (f'Unknown error. JSON: {response.json()}, ')
+            error_string += (f'Error: {sys.exc_info()[0]}. {sys.exc_info()[1]}, '
+                            f'line: {sys.exc_info()[2].tb_lineno}')
+            raise Exception(error_string)
         if detail == 'Not found.':
             #This may happen when script is run against older versions. 
             print(f"WARN: policy_type not found: {policy_type}")
@@ -78,6 +84,9 @@ def create_json_files(response,policy_type):
         #print(f'policy: {policy}')
         #print(f'Backing up {policy_type} policy: {policy["name"]}')
         filename = f'{FILE_PATH}{policy_type}/{policy["name"]}'
+        if policy_type == "endpoints":
+            if "credential" in policy["_links"]:
+                policy["_links"]["credential"]["title"] = get_credential_name(policy,onefuse)                
         if not os.path.exists(os.path.dirname(filename)):
             try:
                 os.makedirs(os.path.dirname(filename))
@@ -89,6 +98,17 @@ def create_json_files(response,policy_type):
         f.close()
     
     return key_exists(response_json["_links"], "next")
+
+def get_credential_name(policy,onefuse): 
+    href = policy["_links"]["credential"]["href"]
+    url = href.replace('/api/v3/onefuse','')
+    response = onefuse.get(url)
+    try:
+        response.raise_for_status()
+    except: 
+        err_msg = f'Link could not be found for href: {href}'
+        raise Exception(err_msg)
+    return response.json()["name"]
 
 def key_exists(dict, key):  
     if key in dict.keys():
@@ -107,14 +127,14 @@ def main():
         for policy_type in policy_types:
             print(f'Backing up policy_type: {policy_type}')
             response = onefuse.get(f'/{policy_type}/')
-            next_exists = create_json_files(response,policy_type)
+            next_exists = create_json_files(response,policy_type,onefuse)
             while next_exists:
                 next_page = response.json()["_links"]["next"]["href"]
                 next_page = next_page.split("/?")[1]
                 response = onefuse.get(f'/{policy_type}/?{next_page}')
-                next_exists = create_json_files(response,policy_type)
+                next_exists = create_json_files(response,policy_type,onefuse)
 
-                
+          
     #Use git to synch changes to repo
     GIT_PATH = f'{FILE_PATH}.git'
     git_args = [

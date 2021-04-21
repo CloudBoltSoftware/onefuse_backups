@@ -1,10 +1,10 @@
 #!/usr/bin/python
 """
-OneFuse Policy Backup Script
+OneFuse Policy Restore Script
 
 This script will: 
-1. Connect to OneFuse via REST and store all OneFuse Policies in JSON in a local directory
-2. Use git to synch policies to a git repo
+1. Use git to pull content from git repo to FILE_PATH set below
+2. Connect to OneFuse via REST and restore all OneFuse Policies in the FILE_PATH
 
 Pre-Requisites: 
 1. Create a Connection Info for onefuse. This must be labelled as 'onefuse', and named 'onefuse'
@@ -26,14 +26,16 @@ Pre-Requisites:
     > cd /var/opt/cloudbolt/proserv/<directory name here>
     > git clone https://<git username>:<git password>@github.com/<repo url>
 3. Update FILE_PATH below to reflect the directory where the repo was cloned to
-4. Update GIT_AUTHOR below to reflect the author information
 
 Use: 
 1. Copy the entire onefuse_backups directory to /var/opt/cloudbolt/proserv/xui/ on the OneFuse appliance
 2. This script can be executed by:
-    > python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_backups.py
+    > python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py
 
-This script can also be scheduled using cron if desired to have schedule policy backups/versioning
+NOTE: If you have used this script to restore any credentials, this script does not store or restore
+passwords. If credentials are restored to an instance, you will need to update the password for each 
+restored credential. If the credentials already existed, this script will not overwrite the existing 
+password, but will update all other properties of a credential.
 """
 
 if __name__ == '__main__':
@@ -52,9 +54,7 @@ import subprocess
 from os import listdir
 from os.path import isfile, join
 
-
 FILE_PATH = '/var/opt/cloudbolt/proserv/onefuse_backups/se-onefuse-dev2_backups/'
-GIT_AUTHOR = 'OneFuse Admin <onefuse@cloudbolt.io>' #format: 'First Last <email@domain.com>', there must be a space between Last and <
 
 def create_restore_content(json_content,onefuse):
     restore_json = {}
@@ -94,17 +94,29 @@ def get_link_id(onefuse,link_type,link_name):
                         f'link_name: {link_name}')
         raise Exception(error_string)
 
-
 def main():
     policy_types = [
-        "moduleCredentials","endpoints","validators","namingSequences","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
-        "scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
+        "moduleCredentials"#,"endpoints","validators","namingSequences","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
+        #"scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
     ]
 
-    #Gather policies from OneFuse, store them under FILE_PATH
+    #Use git to synch changes to repo
+    GIT_PATH = f'{FILE_PATH}.git'
+    git_args = [
+        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}','pull'],
+    ]
+    for args in git_args:
+        res = subprocess.Popen(args, stdout=subprocess.PIPE)
+        output, _error = res.communicate()
+        if not _error:
+            print(output)
+        else:
+            print(_error)
+
+    #Gather policies from FILE_PATH, restore them to OneFuse
     with OneFuseConnector("onefuse") as onefuse:
         for policy_type in policy_types:
-            print(f'Backing up policy_type: {policy_type}')
+            print(f'Restoring policy_type: {policy_type}')
             policy_type_path = f'{FILE_PATH}{policy_type}/'
             if os.path.exists(os.path.dirname(policy_type_path)):
                 policy_files = [f for f in listdir(policy_type_path) if isfile(join(policy_type_path, f))]
@@ -115,57 +127,55 @@ def main():
                     policy_name = json_content["name"]
                     #Check does policy exist
                     response = onefuse.get(f'/{policy_type}/?filter=name.iexact:"{policy_name}"')
-                    response.raise_for_status()
+                    #Check for errors. If "Not Found." returned continue to next file_name
+                    try:
+                        response.raise_for_status()
+                    except:
+                        try: 
+                            detail = response.json()["detail"]
+                        except: 
+                            error_string = (f'Unknown error. JSON: {response.json()}, ')
+                            error_string += (f'Error: {sys.exc_info()[0]}. {sys.exc_info()[1]}, '
+                                            f'line: {sys.exc_info()[2].tb_lineno}')
+                            raise Exception(error_string)
+                        if detail == 'Not found.':
+                            #This may happen when script is run against older versions. 
+                            print(f"WARN: policy_type not found: {policy_type}, file_name: {file_name}")
+                            continue
+                        else: 
+                            error_string = (f'Unknown error. JSON: {response.json()}, ')
+                            error_string += (f'Error: {sys.exc_info()[0]}. {sys.exc_info()[1]}, '
+                                            f'line: {sys.exc_info()[2].tb_lineno}')
+                            raise Exception(error_string)
+
                     response_json = response.json()
                     if response_json["count"] == 0:
-                        policy_exists = False
-
+                        print(f'Creating OneFuse Content. policy_type: {policy_type}, file_name: {file_name}')
+                        url = f'/{policy_type}/'
+                        restore_content = create_restore_content(json_content,onefuse)
+                        if policy_type == "moduleCredentials": 
+                            restore_content["password"] = "Pl@ceHolder123!"
+                            print("WARN: Your credential has been restored but before it can be used"
+                                  f" you must update the password for the credential: {file_name}")
+                        response = onefuse.post(url,json=restore_content)
+                        print(response)
+                        response.raise_for_status()
                     elif response_json["count"] == 1:
-                        print("elif")
+                        print(f'Updating OneFuse Content. policy_type: {policy_type}, file_name: {file_name}')
                         policy_json = response_json["_embedded"][policy_type][0]
                         policy_id = policy_json["id"]
                         url = f'/{policy_type}/{policy_id}/'
                         restore_content = create_restore_content(json_content,onefuse)
-                        onefuse.put(url,json=restore_content)
+                        response = onefuse.put(url,json=restore_content)
+                        response.raise_for_status()
                     else:    
                         err_str = (f'WARN: More than one policy was found with the'
                                   f' name: {policy_name} and type: {policy_type}. '
                                   f'Skipping policy restore')
                         print(err_str)
-                    #If exist, then update
-
-                    #If not exist, create
-
-
-
             else:
-                print(f'Directory for policy type: {policy_type} does not exist. Skipping.')
-            f = open(f'{policy_type_path}{file_name}','w+')
-            
-            
-            
-            
-            
+                print(f'Directory for policy type: {policy_type} does not exist. Skipping.')            
 
-
-
-                
-    #Use git to synch changes to repo
-    GIT_PATH = f'{FILE_PATH}.git'
-    git_args = [
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}','pull'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'add', '*'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'push']
-    ]
-    for args in git_args:
-        res = subprocess.Popen(args, stdout=subprocess.PIPE)
-        output, _error = res.communicate()
-
-        if not _error:
-            print(output)
-        else:
-            print(_error)
 
 if __name__ == "__main__":
     main()
