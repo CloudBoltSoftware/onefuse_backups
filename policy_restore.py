@@ -97,6 +97,8 @@ def get_link_id(onefuse,link_type,link_name,policy_type,
             endpoint_type = "microsoft"
         elif policy_type == "ansibleTowerPolicies":
             endpoint_type = "ansible_tower"
+        elif policy_type == "servicenowCMDBPolicies":
+            endpoint_type = "servicenow"
         else:
             endpoint_type = json_content["type"]
         url = (f'/{link_type}/?filter=name.iexact:"{link_name}";'
