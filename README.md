@@ -1,5 +1,5 @@
 # OneFuse Backup and Restore Scripts
-This repo contains 
+This repo contains scripts required to back up OneFuse Policies to a git repo and potentially restore them to an instance. 
 
 ## Setup/Pre-Requisites
 1. Copy the entire onefuse_backups repo to /var/opt/cloudbolt/proserv/xui/
