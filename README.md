@@ -7,21 +7,23 @@ This repo contains scripts required to back up OneFuse Policies to a git repo an
 2. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
    and named 'onefuse'
     - To do this manually from shell plus: 
-        > python /opt/cloudbolt/manage.py shell_plus
-        > ci = ConnectionInfo(
-              name='onefuse',
-              username='<username>',
-              password='<password>',
-              ip='<onefuse fqdn>',
-              port=<port>,
-              protocol='https'
-          )
-        > ci.save()
-        > ci.labels.add('onefuse')
-        > ci.save()
+        ```
+        python /opt/cloudbolt/manage.py shell_plus
+        ci = ConnectionInfo(
+            name='onefuse',
+            username='<username>',
+            password='<password>',
+            ip='<onefuse fqdn>',
+            port=<port>,
+            protocol='https'
+        )
+        ci.save()
+        ci.labels.add('onefuse')
+        ci.save()
+        ```
 3. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
-    > cd /var/opt/cloudbolt/proserv/<directory name here if desired>
-    > git clone https://<git username>:<git password>@github.com/<repo url>
+    cd /var/opt/cloudbolt/proserv/<directory name here if desired>
+    git clone https://<git username>:<git password>@github.com/<repo url>
 
 ## OneFuse Policy Backups Script
 ### Purpose
@@ -35,8 +37,9 @@ The backup script will:
 
 ### Execution
 Execute bacvkups by:
-    > python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_backups.py
-
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_backups.py
+    ```
 ## OneFuse Policy Restore Script
 ### Purpose
 The restore script will: 
@@ -48,8 +51,9 @@ The restore script will:
 
 ### Execution
 Execute a restore by:
-    > python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py
-
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py
+    ```
 ###Restore Note: 
 If you use the restore script to restore any credentials, the script does
 not store or restore passwords. If credentials are created for an instance, you
