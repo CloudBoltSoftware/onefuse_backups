@@ -22,9 +22,10 @@ This repo contains scripts required to back up OneFuse Policies to a git repo an
         ci.save()
         ```
 3. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
+    ```
     cd /var/opt/cloudbolt/proserv/<directory name here if desired>
     git clone https://<git username>:<git password>@github.com/<repo url>
-
+    ```
 
 
 ## OneFuse Policy Backups Script
