@@ -101,8 +101,8 @@ def get_link_id(onefuse,link_type,link_name,policy_type,json_content):
 
 def main():
     policy_types = [
-        "moduleCredentials","endpoints","validators"#,"namingSequences","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
-        #"scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
+        "moduleCredentials","endpoints","validators","namingSequences","namingPolicies","propertySets","ipamPolicies","dnsPolicies","microsoftADPolicies","ansibleTowerPolicies",
+        "scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
     ]
 
     #Use git to synch changes to repo
