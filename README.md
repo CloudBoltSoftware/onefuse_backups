@@ -6,7 +6,7 @@ This repo contains scripts required to back up OneFuse Policies to a git repo an
    on the OneFuse appliance
 2. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
    and named 'onefuse'
-    - To do this manually from shell plus: 
+    - To do this manually from shell plus ssh in to the OneFuse appliance and then: 
         ```
         python /opt/cloudbolt/manage.py shell_plus
         ci = ConnectionInfo(
