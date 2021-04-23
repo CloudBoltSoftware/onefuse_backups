@@ -25,6 +25,8 @@ This repo contains scripts required to back up OneFuse Policies to a git repo an
     cd /var/opt/cloudbolt/proserv/<directory name here if desired>
     git clone https://<git username>:<git password>@github.com/<repo url>
 
+
+
 ## OneFuse Policy Backups Script
 ### Purpose
 The backup script will: 
@@ -40,6 +42,9 @@ Execute bacvkups by:
     ```
     python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_backups.py
     ```
+    
+    
+    
 ## OneFuse Policy Restore Script
 ### Purpose
 The restore script will: 
