@@ -35,8 +35,9 @@ The backup script will:
 2. Use git to synch policies to a git repo
 
 ### Policy Backup Setup:
-1. Update the FILE_PATH variable in policy_backups.py to reflect the directory where the repo is cloned to.
-2. Update the GIT_AUTHOR variable in policy_backups.py to reflect who any commits should be attributed to. 
+1. Update BACKUPS_PATH below to reflect the subdirectory under the folder where you would like backups to end up. This would allow for multiple OneFuse instances to backup to the same git repo. To only backup a single OneFuse instance, GIT_PATH can equal BACKUPS_PATH
+2. Update GIT_PATH below to reflect the directory where the repo was cloned to
+3. Update GIT_AUTHOR below to reflect the author information
 
 ### Execution
 Execute bacvkups by:

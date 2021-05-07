@@ -25,7 +25,11 @@ Pre-Requisites:
     > mkdir /var/opt/cloudbolt/proserv/<directory name here>
     > cd /var/opt/cloudbolt/proserv/<directory name here>
     > git clone https://<git username>:<git password>@github.com/<repo url>
-3. Update FILE_PATH below to reflect the directory where the repo was cloned to
+3. Update BACKUPS_PATH below to reflect the subdirectory under the folder where 
+   you would like backups to end up. This would allow for multiple OneFuse 
+   instances to backup to the same git repo. To only backup a single OneFuse
+   instance, GIT_PATH can equal BACKUPS_PATH
+4. Update GIT_PATH below to reflect the directory where the repo was cloned to
 4. Update GIT_AUTHOR below to reflect the author information
 
 Use: 
@@ -54,7 +58,8 @@ import subprocess
 
 
 
-FILE_PATH = '/var/opt/cloudbolt/proserv/onefuse_backups/se-onefuse-dev2_backups/'
+BACKUPS_PATH = '/var/opt/cloudbolt/proserv/se-1f-demo-backups/se-1f-demo-1-3/'
+GIT_PATH = '/var/opt/cloudbolt/proserv/se-1f-demo-backups/'
 GIT_AUTHOR = 'OneFuse Admin <onefuse@cloudbolt.io>' #format: 'First Last <email@domain.com>', there must be a space between Last and <
 
 def create_json_files(response,policy_type,onefuse):
@@ -83,7 +88,7 @@ def create_json_files(response,policy_type,onefuse):
     for policy in response_json["_embedded"][policy_type]:
         #print(f'policy: {policy}')
         #print(f'Backing up {policy_type} policy: {policy["name"]}')
-        filename = f'{FILE_PATH}{policy_type}/{policy["name"]}'
+        filename = f'{BACKUPS_PATH}{policy_type}/{policy["name"]}'
         if policy_type == "endpoints":
             if "credential" in policy["_links"]:
                 policy["_links"]["credential"]["title"] = get_credential_name(policy,onefuse)                
@@ -94,11 +99,11 @@ def create_json_files(response,policy_type,onefuse):
                 if exc.errno != errno.EEXIST:
                     raise
         if "type" in policy:
-            file_name = f'{FILE_PATH}{policy_type}/{policy["type"]}_{policy["name"]}.json'
+            file_name = f'{BACKUPS_PATH}{policy_type}/{policy["type"]}_{policy["name"]}.json'
         elif "endpointType" in policy:
-            file_name = f'{FILE_PATH}{policy_type}/{policy["endpointType"]}_{policy["name"]}.json'
+            file_name = f'{BACKUPS_PATH}{policy_type}/{policy["endpointType"]}_{policy["name"]}.json'
         else: 
-            file_name = f'{FILE_PATH}{policy_type}/{policy["name"]}.json'
+            file_name = f'{BACKUPS_PATH}{policy_type}/{policy["name"]}.json'
         f = open(file_name,'w+')
         f.write(json.dumps(policy, indent=4))
         f.close()
@@ -128,7 +133,7 @@ def main():
         "scriptingPolicies","servicenowCMDBPolicies","vraPolicies"
     ]
 
-    #Gather policies from OneFuse, store them under FILE_PATH
+    #Gather policies from OneFuse, store them under BACKUPS_PATH
     with OneFuseConnector("onefuse") as onefuse:
         for policy_type in policy_types:
             print(f'Backing up policy_type: {policy_type}')
@@ -142,12 +147,12 @@ def main():
 
           
     #Use git to synch changes to repo
-    GIT_PATH = f'{FILE_PATH}.git'
+    GIT_FILE = f'{GIT_PATH}.git'
     git_args = [
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}','pull'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'add', '.'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
-        ['git', f'--work-tree={FILE_PATH}', f'--git-dir={GIT_PATH}', 'push']
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}','pull'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'add', '.'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'push']
     ]
     for args in git_args:
         res = subprocess.Popen(args, stdout=subprocess.PIPE)

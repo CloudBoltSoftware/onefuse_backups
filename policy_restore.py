@@ -26,7 +26,8 @@ Pre-Requisites:
     > mkdir /var/opt/cloudbolt/proserv/<directory name here>
     > cd /var/opt/cloudbolt/proserv/<directory name here>
     > git clone https://<git username>:<git password>@github.com/<repo url>
-3. Update FILE_PATH below to reflect the directory where the repo was cloned to
+3. Update FILE_PATH below to reflect the directory in the cloned repo that you
+   would like to restore from.
 
 Use: 
 1. Copy the entire onefuse_backups directory to /var/opt/cloudbolt/proserv/xui/ 
@@ -57,7 +58,7 @@ import subprocess
 from os import listdir
 from os.path import isfile, join
 
-FILE_PATH = '/var/opt/cloudbolt/proserv/se-onefuse-dev2_backups/'
+FILE_PATH = '/var/opt/cloudbolt/proserv/se-1f-demo-backups/se-1f-demo-1-3'
 
 def create_restore_content(json_content,onefuse,policy_type):
     restore_json = {}
