@@ -54,7 +54,7 @@ The restore script will:
 2. Connect to OneFuse via REST and restore all OneFuse Policies in the FILE_PATH
 
 ### Policy Restore Setup:
-1. Update the FILE_PATH variable in the policy_restore.py to reflect the directory where the repo is cloned to.
+1. Update the FILE_PATH variable in the policy_restore.py to reflect the directory in the cloned repo that you would like to restore from.
 
 ### Execution
 Execute a restore by:
