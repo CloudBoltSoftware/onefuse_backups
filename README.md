@@ -67,3 +67,36 @@ not store or restore passwords. If credentials are created for an instance, you
 will need to update the password for each created credential. If the credentials
 already existed, this script will not overwrite the existing password, but will
 update all other properties of a credential.
+
+
+
+## OneFuse Restore Specific Policies Script
+### Purpose
+1. Restore all files to OneFuse passed in as args to the script.
+2. This script can restore OneFuse JSON policies either from a file on the 
+   local system or directly from a git repo. 
+3. This script is not aware of policy dependencies. If you have dependencies
+   (eg. Naming Policy needs a Naming Sequence, or Endpoint needs Credentials)
+   You will also need to pass in the json for the dependency as an argument 
+   prior to the dependent policy.
+
+### Execution
+1. This script can be executed by:
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py <arg1> <arg2> <arg3>
+    ```
+   
+### Examples
+1. Restore a single Naming Policy from file
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py '/var/opt/cloudbolt/proserv/se-1f-demo-backups/se-1f-demo-1-3/namingPolicies/docker_port.json'
+    ```
+2. Restore Naming Policy where dependency of Naming Sequence doesn't already exist on the server. Note: the dependency is called first:
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py '/var/opt/cloudbolt/proserv/se-1f-demo-backups/se-1f-demo-1-3/namingSequences/BASE10_port.json' '/var/opt/cloudbolt/proserv/se-1f-demo-backups/se-1f-demo-1-3/namingPolicies/docker_port.json'
+    ```
+3. Restore a namingPolicy from a git repo. Note: be sure to use the raw link here. If it is a private repo, you will also want to include your token in the url.     
+    ```
+    python /var/opt/cloudbolt/proserv/xui/onefuse_backups/policy_restore.py https://raw.githubusercontent.com/CloudBoltSoftware/se-1f-demo-backups/main/se-1f-demo-1-3/namingPolicies/test_backups.json
+    ```
+ 
