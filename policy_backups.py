@@ -30,7 +30,7 @@ Pre-Requisites:
    instances to backup to the same git repo. To only backup a single OneFuse
    instance, GIT_PATH can equal BACKUPS_PATH
 4. Update GIT_PATH below to reflect the directory where the repo was cloned to
-4. Update GIT_AUTHOR below to reflect the author information
+5. Update GIT_AUTHOR below to reflect the author information
 
 Use: 
 1. Copy the entire onefuse_backups directory to /var/opt/cloudbolt/proserv/xui/ on the OneFuse appliance
