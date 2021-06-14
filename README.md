@@ -3,7 +3,7 @@ This repo contains sample scripts to back up OneFuse Policies to a git repo and 
 
 ## Setup/Pre-Requisites
 1. Copy the entire onefuse_backups repo to /var/opt/cloudbolt/proserv/xui/
-   on the OneFuse appliance
+   on the OneFuse appliance. If the xui directory doesn't exist, you can create it. 
 2. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
    and named 'onefuse'
     - To do this manually from shell plus ssh in to the OneFuse appliance and then: 
