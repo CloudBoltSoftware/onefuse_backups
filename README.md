@@ -9,9 +9,10 @@ To learn more about OneFuse Backups and Policy Restores, the documentation can b
 
 
 ## Setup/Pre-Requisites
-1. Copy the policy_backups.py script to /var/opt/cloudbolt/proserv/onefuse_backups/
-   on the OneFuse appliance. If the onefuse_backups directory doesn't exist, you can create it. 
-2. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
+1. Install the [OneFuse Python Module](https://docs.cloudbolt.io/articles/onefuse-latest/python-module-getting-started/a/h2__93825394) on the OneFuse appliance.
+2. Copy the policy_backups.py script to /var/opt/cloudbolt/proserv/onefuse_backups/
+   on the OneFuse appliance. You will need to create the onefuse_backups directory. 
+3. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
    and named 'onefuse'. 
     - To do this manually from shell plus ssh in to the OneFuse appliance and then: 
         ```
@@ -28,7 +29,7 @@ To learn more about OneFuse Backups and Policy Restores, the documentation can b
         ci.labels.add('onefuse')
         ci.save()
         ```
-3. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
+4. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
     ```
     cd /var/opt/cloudbolt/proserv/<directory name here if desired>
     git clone https://<git username>:<git password>@github.com/<repo url>

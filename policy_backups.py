@@ -8,7 +8,7 @@ specific use case.
 
 This script will:
 1. Connect to OneFuse via REST and store all OneFuse Policies in JSON in a local directory
-2. Use git to synch policies to a git repo
+2. Use git to sync policies to a git repo
 
 Pre-Requisites: 
 1. Logged in to the OneFuse appliance as root, install the OneFuse Python Module:
@@ -28,8 +28,7 @@ Pre-Requisites:
         > ci.labels.add('onefuse')
         > ci.save()
 3. Use Git to clone repo to somewhere under /var/opt/cloudbolt/proserv/
-    > mkdir /var/opt/cloudbolt/proserv/<directory name here>
-    > cd /var/opt/cloudbolt/proserv/<directory name here>
+    > cd /var/opt/cloudbolt/proserv/
     > git clone https://<git username>:<git password>@github.com/<repo url>
 4. Update BACKUPS_PATH below to reflect the subdirectory under the folder where
    you would like backups to end up. This would allow for multiple OneFuse 
@@ -43,27 +42,25 @@ Use:
 2. This script can be executed by:
     > python /var/opt/cloudbolt/proserv/onefuse_backups/policy_backups.py
 
-This script can also be scheduled using cron if desired to have schedule policy backups/versioning
+This script can also be scheduled using cron if desired to have scheduled policy backups/versioning
 """
-
 
 if __name__ == '__main__':
     import os
     import sys
     import django
+
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
     sys.path.append('/opt/cloudbolt')
     django.setup()
-
 
 from onefuse.cloudbolt_admin import CbOneFuseManager
 from onefuse.backups import BackupManager
 import subprocess
 
-
 BACKUPS_PATH = '/var/opt/cloudbolt/proserv/se-1f-demo-backups/cb-mb-01/'
 GIT_PATH = '/var/opt/cloudbolt/proserv/se-1f-demo-backups/'
-GIT_AUTHOR = 'OneFuse Admin <onefuse@cloudbolt.io>' #format: 'First Last <email@domain.com>', there must be a space between Last and <
+GIT_AUTHOR = 'OneFuse Admin <onefuse@cloudbolt.io>'  # format: 'First Last <email@domain.com>', there must be a space between Last and <
 CONN_INFO_NAME = "onefuse"
 
 
@@ -71,14 +68,16 @@ def main():
     ofm = CbOneFuseManager(CONN_INFO_NAME)
     backups = BackupManager(ofm)
     backups.backup_policies(BACKUPS_PATH)
-          
-    #Use git to synch changes to repo
-    GIT_FILE = f'{GIT_PATH}.git'
+
+    # Use git to sync changes to repo
+    git_file = f'{GIT_PATH}.git'
     git_args = [
-        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}','pull'],
-        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'add', '.'],
-        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'commit', '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
-        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={GIT_FILE}', 'push']
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={git_file}', 'pull'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={git_file}', 'add',
+         '.'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={git_file}', 'commit',
+         '-a', '-m "OneFuse Backup"', f'--author={GIT_AUTHOR}'],
+        ['git', f'--work-tree={GIT_PATH}', f'--git-dir={git_file}', 'push']
     ]
     for args in git_args:
         res = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -88,6 +87,7 @@ def main():
             print(output)
         else:
             print(_error)
+
 
 if __name__ == "__main__":
     main()
