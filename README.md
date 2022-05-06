@@ -14,6 +14,7 @@ To learn more about OneFuse Backups and Policy Restores, the documentation can b
    on the OneFuse appliance. You will need to create the onefuse_backups directory. 
 3. Create a Connection Info for onefuse. This must be labelled as 'onefuse', 
    and named 'onefuse'. 
+    - If you are running a dual personality instance where CloudBolt is also installed, you can log in to the CloudBolt UI and create a Connection Info - or use an existing one.
     - To do this manually from shell plus ssh in to the OneFuse appliance and then: 
         ```
         python /opt/cloudbolt/manage.py shell_plus
